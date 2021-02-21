@@ -75,6 +75,7 @@ public class EmbedServer {
                                             .addLast(new IdleStateHandler(0, 0, 30 * 3, TimeUnit.SECONDS))  // beat 3N, close if idle
                                             .addLast(new HttpServerCodec())
                                             .addLast(new HttpObjectAggregator(5 * 1024 * 1024))  // merge request & reponse to FULL
+                                            // 接受请求处理器, 调度中心调度请求通过该handler进行处理
                                             .addLast(new EmbedHttpServerHandler(executorBiz, accessToken, bizThreadPool));
                                 }
                             })
@@ -85,7 +86,7 @@ public class EmbedServer {
 
                     logger.info(">>>>>>>>>>> xxl-job remoting server start success, nettype = {}, port = {}", EmbedServer.class, port);
 
-                    // start registry
+                    // start registry 任务执行器向调度中心注册自己
                     startRegistry(appname, address);
 
                     // wait util stop
@@ -98,7 +99,7 @@ public class EmbedServer {
                         logger.error(">>>>>>>>>>> xxl-job remoting server error.", e);
                     }
                 } finally {
-                    // stop
+                    // stop netty优雅关闭
                     try {
                         workerGroup.shutdownGracefully();
                         bossGroup.shutdownGracefully();

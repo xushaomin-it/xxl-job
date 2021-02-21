@@ -34,7 +34,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
         // init JobHandler Repository
         /*initJobHandlerRepository(applicationContext);*/
 
-        // init JobHandler Repository (for method)
+        // init JobHandler Repository (for method), 注册 jobhandler, 基于java method
         initJobHandlerMethodRepository(applicationContext);
 
         // refresh GlueFactory
@@ -82,10 +82,10 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
             return;
         }
         // init job handler from method
-        String[] beanDefinitionNames = applicationContext.getBeanNamesForType(Object.class, false, true);
+        String[] beanDefinitionNames = applicationContext.getBeanNamesForType(Object.class, false, true); // 获取到所有beanDefinition的名称
         for (String beanDefinitionName : beanDefinitionNames) {
-            Object bean = applicationContext.getBean(beanDefinitionName);
-
+            Object bean = applicationContext.getBean(beanDefinitionName); // 根据beanDefinition名称获取对应的bean
+            // 所有贴有@XxlJob注解的方法, 基于spring bean获取, 所以 @XxlJob 修饰的方法一定要是spring bean
             Map<Method, XxlJob> annotatedMethods = null;   // referred to ：org.springframework.context.event.EventListenerMethodProcessor.processBean
             try {
                 annotatedMethods = MethodIntrospector.selectMethods(bean.getClass(),
@@ -113,7 +113,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                 if (name.trim().length() == 0) {
                     throw new RuntimeException("xxl-job method-jobhandler name invalid, for[" + bean.getClass() + "#" + executeMethod.getName() + "] .");
                 }
-                if (loadJobHandler(name) != null) {
+                if (loadJobHandler(name) != null) { // 校验 jobhandler name 是否重复
                     throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
                 }
 
@@ -129,7 +129,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
 
                 executeMethod.setAccessible(true);
 
-                // init and destory
+                // init and destory 是否有 init, destroy 方法
                 Method initMethod = null;
                 Method destroyMethod = null;
 
@@ -150,7 +150,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                     }
                 }
 
-                // registry jobhandler
+                // registry jobhandler 注册 jobhandler, 存放于一个 jobhandlerName -> methodJobHandler 的map中
                 registJobHandler(name, new MethodJobHandler(bean, executeMethod, initMethod, destroyMethod));
             }
         }

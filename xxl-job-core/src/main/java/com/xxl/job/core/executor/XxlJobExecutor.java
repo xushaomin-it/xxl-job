@@ -64,20 +64,21 @@ public class XxlJobExecutor  {
     // ---------------------- start + stop ----------------------
     public void start() throws Exception {
 
-        // init logpath
+        // init logpath 初始化日志目录路径
         XxlJobFileAppender.initLogPath(logPath);
 
-        // init invoker, admin-client
+        // init invoker, admin-client 初始化adminBizList, 方便后续调度中心注册自己
         initAdminBizList(adminAddresses, accessToken);
 
 
-        // init JobLogFileCleanThread
+        // init JobLogFileCleanThread 初始化日志清洗线程
         JobLogFileCleanThread.getInstance().start(logRetentionDays);
 
-        // init TriggerCallbackThread
+        // init TriggerCallbackThread, 初始化调度任务回调线程, 向调度中心回报任务执行结果
         TriggerCallbackThread.getInstance().start();
 
-        // init executor-server
+        // init executor-server 初始化执行器, 重点
+        // 1. 创建netty服务端, 2. 执行器向调度中心注册自己, 同时开启心跳检测线程
         initEmbedServer(address, ip, port, appname, accessToken);
     }
     public void destroy(){
@@ -152,7 +153,7 @@ public class XxlJobExecutor  {
             logger.warn(">>>>>>>>>>> xxl-job accessToken is empty. To ensure system security, please set the accessToken.");
         }
 
-        // start
+        // start 创建netty服务端
         embedServer = new EmbedServer();
         embedServer.start(address, port, appname, accessToken);
     }

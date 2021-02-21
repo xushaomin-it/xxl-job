@@ -43,7 +43,7 @@ public class ExecutorRegistryThread {
                 while (!toStop) {
                     try {
                         RegistryParam registryParam = new RegistryParam(RegistryConfig.RegistType.EXECUTOR.name(), appname, address);
-                        for (AdminBiz adminBiz: XxlJobExecutor.getAdminBizList()) {
+                        for (AdminBiz adminBiz: XxlJobExecutor.getAdminBizList()) { // 调度中心集群情况下, 向每个调度中心注册自己
                             try {
                                 ReturnT<String> registryResult = adminBiz.registry(registryParam);
                                 if (registryResult!=null && ReturnT.SUCCESS_CODE == registryResult.getCode()) {
@@ -66,7 +66,7 @@ public class ExecutorRegistryThread {
                     }
 
                     try {
-                        if (!toStop) {
+                        if (!toStop) { // 执行器向调度中心注册自己, 心跳检测, 每30s
                             TimeUnit.SECONDS.sleep(RegistryConfig.BEAT_TIMEOUT);
                         }
                     } catch (InterruptedException e) {

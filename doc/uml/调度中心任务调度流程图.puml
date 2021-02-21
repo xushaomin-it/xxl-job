@@ -1,0 +1,34 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+XxlJobScheduler -> JobScheduleHelper: JobScheduleHelper.getInstance().start()
+JobScheduleHelper -> scheduleThread: scheduleThread.start()
+JobScheduleHelper -> ringThread: ringThread.start()
+scheduleThread -> scheduleThread:
+rnote over scheduleThread
+1. 死循环获取已过触发时间和未来5s内将触发
+的任务,进行遍历,根据触发时间的不同有三个
+分支,最后更新任务相关数据(下次执行时间)
+2. 第一个分支为触发时间<nowTime已到达5s
+之上的任务,直接更新任务下次触发时间
+3. 第二个分支为触发时间<nowTime,先触发
+任务调度,然后计算下一次触发时间,如果在
+5s之内触发,操作逻辑同第三个分支
+4. 第三个分支为触发时间还味道,先对触发
+时间秒数60取模,调用pushTimeRing方法,
+然后计算下一次触发时间
+5. ringData是以0到59的整数为key,以
+jobId集合为value的map,处理逻辑在第二
+个守护线程ringThread中
+endrnote
+scheduleThread ->  JobTriggerPoolHelper: JobTriggerPoolHelper.trigger
+ringThread -> ringThread:
+rnote over ringThread
+1. 死循环,取当前秒数可读和前一个刻度,
+在ringData中获取要执行的任务
+endrnote
+ringThread ->  JobTriggerPoolHelper: JobTriggerPoolHelper.trigger
+
+@enduml

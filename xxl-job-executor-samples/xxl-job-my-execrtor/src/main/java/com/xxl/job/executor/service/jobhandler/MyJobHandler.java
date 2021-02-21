@@ -19,6 +19,7 @@ public class MyJobHandler {
 
         for (int i = 0; i < 5; i++) {
             XxlJobHelper.log("beat at:" + i);
+            System.out.println("XXL-JOB, Hello World");
             TimeUnit.SECONDS.sleep(2);
         }
         // default success
