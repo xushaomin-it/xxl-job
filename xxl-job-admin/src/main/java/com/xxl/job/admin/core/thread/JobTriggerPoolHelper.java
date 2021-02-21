@@ -25,7 +25,7 @@ public class JobTriggerPoolHelper {
     private ThreadPoolExecutor slowTriggerPool = null;
 
     public void start(){
-        fastTriggerPool = new ThreadPoolExecutor(
+        fastTriggerPool = new ThreadPoolExecutor( // 快触发调度线程池
                 10,
                 XxlJobAdminConfig.getAdminConfig().getTriggerPoolFastMax(),
                 60L,
@@ -38,7 +38,7 @@ public class JobTriggerPoolHelper {
                     }
                 });
 
-        slowTriggerPool = new ThreadPoolExecutor(
+        slowTriggerPool = new ThreadPoolExecutor( // 慢触发调度线程池
                 10,
                 XxlJobAdminConfig.getAdminConfig().getTriggerPoolSlowMax(),
                 60L,
