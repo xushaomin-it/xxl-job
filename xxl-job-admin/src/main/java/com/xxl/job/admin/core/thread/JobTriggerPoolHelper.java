@@ -79,6 +79,7 @@ public class JobTriggerPoolHelper {
         // choose thread pool
         ThreadPoolExecutor triggerPool_ = fastTriggerPool;
         AtomicInteger jobTimeoutCount = jobTimeoutCountMap.get(jobId);
+        // 判断该任务是否是慢任务, 1分钟超过10次耗时超过500ms, 则将任务放入慢任务线程池进行处理, 避免快任务线程池资源耗尽
         if (jobTimeoutCount!=null && jobTimeoutCount.get() > 10) {      // job-timeout 10 times in 1 min
             triggerPool_ = slowTriggerPool;
         }
@@ -104,9 +105,10 @@ public class JobTriggerPoolHelper {
                         jobTimeoutCountMap.clear();
                     }
 
-                    // incr timeout-count-map
+                    // incr timeout-count-map, 计算调度任务执行耗时情况
                     long cost = System.currentTimeMillis()-start;
                     if (cost > 500) {       // ob-timeout threshold 500ms
+                        // 如果耗时超过500ms, 则将该任务放入超时计数中, xxl-job判断一个任务是否为慢任务, 通过 1分钟内一个任务执行耗时500ms超过10次进行判定
                         AtomicInteger timeoutCount = jobTimeoutCountMap.putIfAbsent(jobId, new AtomicInteger(1));
                         if (timeoutCount != null) {
                             timeoutCount.incrementAndGet();

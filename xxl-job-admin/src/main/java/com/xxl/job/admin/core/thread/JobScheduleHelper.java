@@ -240,7 +240,7 @@ public class JobScheduleHelper {
                         // second data
                         List<Integer> ringItemData = new ArrayList<>();
                         int nowSecond = Calendar.getInstance().get(Calendar.SECOND);   // 避免处理耗时太长，跨过刻度，向前校验一个刻度；
-                        for (int i = 0; i < 2; i++) {
+                        for (int i = 0; i < 2; i++) { // 取当前秒数和前1秒数
                             List<Integer> tmpData = ringData.remove( (nowSecond+60-i)%60 );
                             if (tmpData != null) {
                                 ringItemData.addAll(tmpData);
@@ -252,7 +252,7 @@ public class JobScheduleHelper {
                         if (ringItemData.size() > 0) {
                             // do trigger
                             for (int jobId: ringItemData) {
-                                // do trigger
+                                // do trigger, 执行调度任务
                                 JobTriggerPoolHelper.trigger(jobId, TriggerTypeEnum.CRON, -1, null, null, null);
                             }
                             // clear
