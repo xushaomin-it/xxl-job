@@ -59,20 +59,25 @@ public class JobRegistryHelper {
 				while (!toStop) {
 					try {
 						// auto registry group
+						// 获取所有自动注册类型的执行器
 						List<XxlJobGroup> groupList = XxlJobAdminConfig.getAdminConfig().getXxlJobGroupDao().findByAddressType(0);
 						if (groupList!=null && !groupList.isEmpty()) {
 
 							// remove dead address (admin/executor)
+							// 获取实时维护的执行器注册表,维护在线的执行器和调度中心机器地址信息,获取超时的执行器(已下线)
 							List<Integer> ids = XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().findDead(RegistryConfig.DEAD_TIMEOUT, new Date());
 							if (ids!=null && ids.size()>0) {
+								// 移除掉已下线的执行器
 								XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().removeDead(ids);
 							}
 
 							// fresh online address (admin/executor)
 							HashMap<String, List<String>> appAddressMap = new HashMap<String, List<String>>();
+							// 查询所有活跃的执行器注册表,update_time在90s内有更新的
 							List<XxlJobRegistry> list = XxlJobAdminConfig.getAdminConfig().getXxlJobRegistryDao().findAll(RegistryConfig.DEAD_TIMEOUT, new Date());
 							if (list != null) {
 								for (XxlJobRegistry item: list) {
+									// 整合每个在xxl_job_group中每个执行器对应地址列表
 									if (RegistryConfig.RegistType.EXECUTOR.name().equals(item.getRegistryGroup())) {
 										String appname = item.getRegistryKey();
 										List<String> registryList = appAddressMap.get(appname);
@@ -103,7 +108,7 @@ public class JobRegistryHelper {
 								}
 								group.setAddressList(addressListStr);
 								group.setUpdateTime(new Date());
-
+                                // 最后更新xxl_job_group执行器的集群地址
 								XxlJobAdminConfig.getAdminConfig().getXxlJobGroupDao().update(group);
 							}
 						}
@@ -113,6 +118,7 @@ public class JobRegistryHelper {
 						}
 					}
 					try {
+						// 每30s执行一次
 						TimeUnit.SECONDS.sleep(RegistryConfig.BEAT_TIMEOUT);
 					} catch (InterruptedException e) {
 						if (!toStop) {

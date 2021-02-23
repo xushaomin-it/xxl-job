@@ -43,6 +43,7 @@ public class JobScheduleHelper {
             public void run() {
 
                 try {
+                    // 5s 后的整秒数,当前毫秒 % 1000 是区域得到下次整秒的时间距离
                     TimeUnit.MILLISECONDS.sleep(5000 - System.currentTimeMillis()%1000 );
                 } catch (InterruptedException e) {
                     if (!scheduleThreadToStop) {
@@ -77,7 +78,7 @@ public class JobScheduleHelper {
 
                         // 1、pre read
                         long nowTime = System.currentTimeMillis();
-                        // 查询获取到接下来5s内即将要执行的任务
+                        // 查询获取到接下来5s内即将要执行的任务, trigger_status(调度状态) = 1(运行) and trigger_next_time(下次调度时间)
                         List<XxlJobInfo> scheduleList = XxlJobAdminConfig.getAdminConfig().getXxlJobInfoDao().scheduleJobQuery(nowTime + PRE_READ_MS, preReadCount);
                         if (scheduleList!=null && scheduleList.size()>0) {
                             // 2、push time-ring
@@ -89,9 +90,9 @@ public class JobScheduleHelper {
                                     // 2.1、trigger-expire > 5s：pass && make next-trigger-time
                                     logger.warn(">>>>>>>>>>> xxl-job, schedule misfire, jobId = " + jobInfo.getId());
 
-                                    // 1、misfire match
+                                    // 1、misfire match 获取当前任务的调度策略
                                     MisfireStrategyEnum misfireStrategyEnum = MisfireStrategyEnum.match(jobInfo.getMisfireStrategy(), MisfireStrategyEnum.DO_NOTHING);
-                                    if (MisfireStrategyEnum.FIRE_ONCE_NOW == misfireStrategyEnum) {
+                                    if (MisfireStrategyEnum.FIRE_ONCE_NOW == misfireStrategyEnum) { // 如果这个任务的超时处理利策略是立即执行一次,那么直接执行
                                         // FIRE_ONCE_NOW 》
                                         JobTriggerPoolHelper.trigger(jobInfo.getId(), TriggerTypeEnum.MISFIRE, -1, null, null, null);
                                         logger.debug(">>>>>>>>>>> xxl-job, schedule push trigger : jobId = " + jobInfo.getId() );
@@ -120,6 +121,10 @@ public class JobScheduleHelper {
                                         pushTimeRing(ringSecond, jobInfo.getId());
 
                                         // 3、fresh next 刷新该调度任务下一次执行时间
+                                        // 在这个任务被加入时间轮前 这个任务的下次执行时间就已经被刷新了,也就是下一次的时间
+                                        // 在这里再次刷新一次,这个下次执行时间(本轮调度后的第二次执行时间)会被记录到数据库中
+                                        // 这样时间轮里面记录的是本轮调度后的下一次调度时间,更新到数据库的是时间轮调度后的下一次时间
+                                        // 下次循环数据库扫描出来这个任务,也是时间轮调度后的下一次,不会处在重复执行的可能
                                         refreshNextValidTime(jobInfo, new Date(jobInfo.getTriggerNextTime()));
 
                                     }
@@ -199,9 +204,11 @@ public class JobScheduleHelper {
 
 
                     // Wait seconds, align second
-                    if (cost < 1000) {  // scan-overtime, not wait
+                    if (cost < 1000) {  // scan-overtime, not wait 如果本次耗时 < 1 s
                         try {
                             // pre-read period: success > scan each second; fail > skip this period; 对齐时间,保证每1s执行一次
+                            // 如果preReadSuc为true表示本次有任务调度, sleep到下一次整秒
+                            // 如果preReadSuc为false表示本次没有任务调度, sleep到第5个整秒
                             TimeUnit.MILLISECONDS.sleep((preReadSuc?1000:PRE_READ_MS) - System.currentTimeMillis()%1000);
                         } catch (InterruptedException e) {
                             if (!scheduleThreadToStop) {
@@ -221,6 +228,7 @@ public class JobScheduleHelper {
 
 
         // ring thread
+        // 处理时间轮中存放的定时任务
         ringThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -239,8 +247,10 @@ public class JobScheduleHelper {
                     try {
                         // second data
                         List<Integer> ringItemData = new ArrayList<>();
-                        int nowSecond = Calendar.getInstance().get(Calendar.SECOND);   // 避免处理耗时太长，跨过刻度，向前校验一个刻度；
-                        for (int i = 0; i < 2; i++) { // 取当前秒数和前1秒数
+                        // 当前秒数
+                        int nowSecond = Calendar.getInstance().get(Calendar.SECOND);
+                        // 避免处理耗时太长，跨过刻度，向前校验一个刻度；
+                        for (int i = 0; i < 2; i++) { // 取当前秒数和前1秒数, 保证时间轮中的每个bucket都能够被处理到
                             List<Integer> tmpData = ringData.remove( (nowSecond+60-i)%60 );
                             if (tmpData != null) {
                                 ringItemData.addAll(tmpData);

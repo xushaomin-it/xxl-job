@@ -72,7 +72,9 @@ public class EmbedServer {
                                 @Override
                                 public void initChannel(SocketChannel channel) throws Exception {
                                     channel.pipeline()
+                                            // 长连接
                                             .addLast(new IdleStateHandler(0, 0, 30 * 3, TimeUnit.SECONDS))  // beat 3N, close if idle
+                                            // http协议解码器
                                             .addLast(new HttpServerCodec())
                                             .addLast(new HttpObjectAggregator(5 * 1024 * 1024))  // merge request & reponse to FULL
                                             // 接受请求处理器, 调度中心调度请求通过该handler进行处理
@@ -89,7 +91,7 @@ public class EmbedServer {
                     // start registry 任务执行器向调度中心注册自己
                     startRegistry(appname, address);
 
-                    // wait util stop
+                    // wait util stop 监听Netty进程销毁，避免代码块执行完，进程自己销毁
                     future.channel().closeFuture().sync();
 
                 } catch (InterruptedException e) {
@@ -195,9 +197,11 @@ public class EmbedServer {
                 if ("/beat".equals(uri)) {
                     return executorBiz.beat();
                 } else if ("/idleBeat".equals(uri)) {
+                    // 检测当前任务是否繁忙
                     IdleBeatParam idleBeatParam = GsonTool.fromJson(requestData, IdleBeatParam.class);
                     return executorBiz.idleBeat(idleBeatParam);
                 } else if ("/run".equals(uri)) {
+                    // 执行任务接口
                     TriggerParam triggerParam = GsonTool.fromJson(requestData, TriggerParam.class);
                     return executorBiz.run(triggerParam);
                 } else if ("/kill".equals(uri)) {

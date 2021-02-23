@@ -27,20 +27,25 @@ public class XxlJobScheduler  {
         // admin trigger pool start 初始化两个触发调度线程, 分为 快, 慢两个线程池
         JobTriggerPoolHelper.toStart();
 
-        // admin registry monitor run, 监控相关
+        // admin registry monitor run
+        // 初始化用于维护xxl_job_group表中自动注册类型执行器的address_list地址
         JobRegistryHelper.getInstance().start();
 
-        // admin fail-monitor run, 失败重试
+        // admin fail-monitor run, 初始化monitorThread线程,用于处理异常任务并进行重试
         JobFailMonitorHelper.getInstance().start();
 
         // admin lose-monitor run ( depend on JobTriggerPoolHelper )
+        // 初始化了callbackThreadPool线程池, 用于处理异常的任务并进行重试
         JobCompleteHelper.getInstance().start();
 
         // admin log report start
+        // 初始化logThread线程,对调度日志进行统计和清理
         JobLogReportHelper.getInstance().start();
 
         // start-schedule  ( depend on JobTriggerPoolHelper )
-        // JobScheduleHelper调度器，死循环，在xxl_job_info表里取将要执行的任务，更新下次执行时间的，调用JobTriggerPoolHelper类，来给执行器发送调度任务的 重点
+        // JobScheduleHelper
+        // 真正开始任务调度的地方,开启scheduleThread线程
+        // 调度器，死循环，在xxl_job_info表里取将要执行的任务，更新下次执行时间的，调用JobTriggerPoolHelper类，来给执行器发送调度任务的 重点
         JobScheduleHelper.getInstance().start();
 
         logger.info(">>>>>>>>> init xxl-job admin success.");
