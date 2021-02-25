@@ -225,6 +225,7 @@ public class JobThread extends Thread{
         }
 
 		// callback trigger request in queue
+        // 如果任务线程终止运行 toStop = true, 那么任务队列中的所有任务都设置为失败,并上报给调度中心
 		while(triggerQueue !=null && triggerQueue.size()>0){
 			TriggerParam triggerParam = triggerQueue.poll();
 			if (triggerParam!=null) {

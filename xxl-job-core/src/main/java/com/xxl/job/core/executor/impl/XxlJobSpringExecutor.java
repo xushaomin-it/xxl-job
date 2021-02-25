@@ -151,7 +151,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                 }
 
                 // registry jobhandler 注册 jobhandler, 存放于一个 jobhandlerName -> methodJobHandler 的map中
-                registJobHandler(name, new MethodJobHandler(bean, executeMethod, initMethod, destroyMethod));
+                    registJobHandler(name, new MethodJobHandler(bean, executeMethod, initMethod, destroyMethod));
             }
         }
 

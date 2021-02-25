@@ -118,16 +118,16 @@ public class ExecutorBizImpl implements ExecutorBiz {
             return new ReturnT<String>(ReturnT.FAIL_CODE, "glueType[" + triggerParam.getGlueType() + "] is not valid.");
         }
 
-        // executor block strategy
+        // executor block strategy 执行阻塞处理策略
         if (jobThread != null) {
             ExecutorBlockStrategyEnum blockStrategy = ExecutorBlockStrategyEnum.match(triggerParam.getExecutorBlockStrategy(), null);
-            if (ExecutorBlockStrategyEnum.DISCARD_LATER == blockStrategy) {
-                // discard when running
+            if (ExecutorBlockStrategyEnum.DISCARD_LATER == blockStrategy) { // 丢弃后续调度
+                // discard when running, 如果当前任务线程正在执行任务, 那么直接返回调度失败
                 if (jobThread.isRunningOrHasQueue()) {
                     return new ReturnT<String>(ReturnT.FAIL_CODE, "block strategy effect："+ExecutorBlockStrategyEnum.DISCARD_LATER.getTitle());
                 }
-            } else if (ExecutorBlockStrategyEnum.COVER_EARLY == blockStrategy) {
-                // kill running jobThread
+            } else if (ExecutorBlockStrategyEnum.COVER_EARLY == blockStrategy) { // 覆盖之前调度
+                // kill running jobThread, 如果当前任务线程正在执行任务,那么将任务线程kill掉, 然后新建一条新的任务线程执行任务
                 if (jobThread.isRunningOrHasQueue()) {
                     removeOldReason = "block strategy effect：" + ExecutorBlockStrategyEnum.COVER_EARLY.getTitle();
 

@@ -79,11 +79,12 @@ public class XxlJobTrigger {
                 shardingParam[1] = Integer.valueOf(shardingArr[1]);
             }
         }
-        // 广播模式,循环执行器配置的服务地址列表
+        // 广播模式or分片模式,循环执行器配置的服务地址列表
         if (ExecutorRouteStrategyEnum.SHARDING_BROADCAST==ExecutorRouteStrategyEnum.match(jobInfo.getExecutorRouteStrategy(), null)
                 && group.getRegistryList()!=null && !group.getRegistryList().isEmpty()
                 && shardingParam==null) {
             for (int i = 0; i < group.getRegistryList().size(); i++) {
+                // 遍历调用所有的执行器,执行器集群列表中当前执行器的序号(i)以及执行器总数量(group.getRegistryList().size())
                 processTrigger(group, jobInfo, finalFailRetryCount, triggerType, i, group.getRegistryList().size());
             }
         } else {
