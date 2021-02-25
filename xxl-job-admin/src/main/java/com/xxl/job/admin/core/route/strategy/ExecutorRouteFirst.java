@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Created by xuxueli on 17/3/10.
+ * 第一个策略
  */
 public class ExecutorRouteFirst extends ExecutorRouter {
 

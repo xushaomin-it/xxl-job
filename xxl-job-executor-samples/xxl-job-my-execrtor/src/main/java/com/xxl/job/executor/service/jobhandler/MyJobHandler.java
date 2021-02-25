@@ -13,6 +13,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class MyJobHandler {
 
+    /**
+     * 1. 简单测试
+     * @throws Exception
+     */
     @XxlJob("demoJobHandler")
     public void demoJobHandler() throws Exception {
         XxlJobHelper.log("XXL-JOB, Hello World.");
@@ -23,6 +27,46 @@ public class MyJobHandler {
             TimeUnit.SECONDS.sleep(2);
         }
         // default success
+    }
+
+    /**
+     * 2、分片广播任务
+     */
+    @XxlJob("shardingJobHandler")
+    public void shardingJobHandler() throws Exception {
+
+        // 分片参数
+        int shardIndex = XxlJobHelper.getShardIndex(); // 当前分片序号(从0开始), 执行器集群列表中当前执行器的序号
+        int shardTotal = XxlJobHelper.getShardTotal(); // 总分片数,执行器集群的总机器数量
+
+        XxlJobHelper.log("分片参数：当前分片序号 = {}, 总分片数 = {}", shardIndex, shardTotal);
+
+        // 业务逻辑
+        for (int i = 0; i < shardTotal; i++) {
+            if (i == shardIndex) {
+                XxlJobHelper.log("第 {} 片, 命中分片开始处理", i);
+                System.out.println("第 " + i + " 片, 命中分片开始处理");
+            } else {
+                XxlJobHelper.log("第 {} 片, 忽略", i);
+            }
+        }
+    }
+
+    /**
+     * 3. 轮询
+     */
+    @XxlJob("routeRound")
+    public void routeRound() throws Exception {
+        System.out.println("xxl-job 轮询调用");
+    }
+
+    /**
+     * 随机
+     * @throws Exception
+     */
+    @XxlJob("routeRandom")
+    public void routeRandom() throws Exception {
+        System.out.println("xxl-job 随机调用");
     }
 
 }

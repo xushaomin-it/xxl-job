@@ -12,7 +12,8 @@ import java.util.concurrent.ConcurrentMap;
  * 单个JOB对应的每个执行器，使用频率最低的优先被选举
  *      a(*)、LFU(Least Frequently Used)：最不经常使用，频率/次数
  *      b、LRU(Least Recently Used)：最近最久未使用，时间
- *
+ * 最不经常使用算法:
+ * 通过map存储每个任务对应的机器执行次数,然后通过map value 排序,得到执行次数最小的那个,也就是得到了最不经常使用的那台机器
  * Created by xuxueli on 17/3/10.
  */
 public class ExecutorRouteLFU extends ExecutorRouter {
@@ -22,7 +23,7 @@ public class ExecutorRouteLFU extends ExecutorRouter {
 
     public String route(int jobId, List<String> addressList) {
 
-        // cache clear
+        // cache clear 缓存时间 一天
         if (System.currentTimeMillis() > CACHE_VALID_TIME) {
             jobLfuMap.clear();
             CACHE_VALID_TIME = System.currentTimeMillis() + 1000*60*60*24;

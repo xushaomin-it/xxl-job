@@ -12,6 +12,8 @@ import java.util.List;
 
 /**
  * Created by xuxueli on 17/3/10.
+ * 忙碌转移策略:
+ * 遍历所有在线的执行器,遍历请求执行器接口判断执行器是否忙碌(执行器任务线程是否处于执行状态)
  */
 public class ExecutorRouteBusyover extends ExecutorRouter {
 
@@ -22,6 +24,7 @@ public class ExecutorRouteBusyover extends ExecutorRouter {
             // beat
             ReturnT<String> idleBeatResult = null;
             try {
+                // 遍历所有执行器,请求执行器接口判断执行器是否忙碌(是否有任务正在执行)
                 ExecutorBiz executorBiz = XxlJobScheduler.getExecutorBiz(address);
                 idleBeatResult = executorBiz.idleBeat(new IdleBeatParam(triggerParam.getJobId()));
             } catch (Exception e) {

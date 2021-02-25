@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * Created by xuxueli on 17/3/10.
+ * 最后一个策略
  */
 public class ExecutorRouteLast extends ExecutorRouter {
 

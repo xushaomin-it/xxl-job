@@ -9,6 +9,7 @@ import java.util.Random;
 
 /**
  * Created by xuxueli on 17/3/10.
+ * 随机策略
  */
 public class ExecutorRouteRandom extends ExecutorRouter {
 

@@ -12,6 +12,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by xuxueli on 17/3/10.
+ * 轮询策略
+ * 获取到该任务的所有执行次数 % 执行器列表总数
+ * 假设现在 执行器集群 3, 当前任务总数3, 那么当前执行器执行总数就是所有数据的总和
  */
 public class ExecutorRouteRound extends ExecutorRouter {
 
@@ -39,6 +42,8 @@ public class ExecutorRouteRound extends ExecutorRouter {
 
     @Override
     public ReturnT<String> route(TriggerParam triggerParam, List<String> addressList) {
+        // 轮询算法, 获取到该任务的所有执行次数 % 执行器列表总数
+        // 假设现在 执行器集群 3, 当前任务总数3, 那么当前执行器执行总数就是所有数据的总和
         String address = addressList.get(count(triggerParam.getJobId())%addressList.size());
         return new ReturnT<String>(address);
     }

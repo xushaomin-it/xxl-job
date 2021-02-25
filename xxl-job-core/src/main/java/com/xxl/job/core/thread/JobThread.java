@@ -158,7 +158,8 @@ public class JobThread extends Thread{
 						} finally {
 							futureThread.interrupt();
 						}
-					} else {
+					}
+					else {
 						// just execute
 						handler.execute();
 					}

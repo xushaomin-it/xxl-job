@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * Created by xuxueli on 17/3/10.
+ * 故障转移策略
  */
 public class ExecutorRouteFailover extends ExecutorRouter {
 
@@ -18,7 +19,7 @@ public class ExecutorRouteFailover extends ExecutorRouter {
     public ReturnT<String> route(TriggerParam triggerParam, List<String> addressList) {
 
         StringBuffer beatResultSB = new StringBuffer();
-        for (String address : addressList) {
+        for (String address : addressList) { // 故障转移策略, 轮询所有执行器, 判断如果执行器没有宕机则直接返回该执行器地址
             // beat
             ReturnT<String> beatResult = null;
             try {

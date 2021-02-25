@@ -235,7 +235,7 @@ public class JobScheduleHelper {
 
                 while (!ringThreadToStop) {
 
-                    // align second
+                    // align second 对齐时间
                     try {
                         TimeUnit.MILLISECONDS.sleep(1000 - System.currentTimeMillis() % 1000);
                     } catch (InterruptedException e) {
