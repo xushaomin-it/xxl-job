@@ -133,7 +133,7 @@ public class ExecutorBizImpl implements ExecutorBiz {
 
                     jobThread = null;
                 }
-            } else {
+            } else { // 单机串行
                 // just queue trigger
             }
         }

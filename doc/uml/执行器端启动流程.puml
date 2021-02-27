@@ -3,8 +3,8 @@
 
 autonumber
 
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+XxlJobSpringExecutor -> XxlJobSpringExecutor: initJobHandlerMethodRepository 注册 jobhandler
+XxlJobExecutor --> XxlJobExecutor: Authentication Response
 
 Alice -> Bob: Another authentication Request
 Alice <-- Bob: another authentication Response

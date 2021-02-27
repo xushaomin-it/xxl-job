@@ -31,13 +31,10 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
     @Override
     public void afterSingletonsInstantiated() {
 
-        // init JobHandler Repository
-        /*initJobHandlerRepository(applicationContext);*/
-
         // init JobHandler Repository (for method), 注册 jobhandler, 基于java method
         initJobHandlerMethodRepository(applicationContext);
 
-        // refresh GlueFactory
+        // refresh GlueFactory 刷新glue模式 生成jobHandler工厂, 用于动态生成jobHandler (任务为GLUE模式下使用)
         GlueFactory.refreshInstance(1);
 
         // super start
@@ -116,19 +113,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                 if (loadJobHandler(name) != null) { // 校验 jobhandler name 是否重复
                     throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
                 }
-
-                // execute method
-                /*if (!(method.getParameterTypes().length == 1 && method.getParameterTypes()[0].isAssignableFrom(String.class))) {
-                    throw new RuntimeException("xxl-job method-jobhandler param-classtype invalid, for[" + bean.getClass() + "#" + method.getName() + "] , " +
-                            "The correct method format like \" public ReturnT<String> execute(String param) \" .");
-                }
-                if (!method.getReturnType().isAssignableFrom(ReturnT.class)) {
-                    throw new RuntimeException("xxl-job method-jobhandler return-classtype invalid, for[" + bean.getClass() + "#" + method.getName() + "] , " +
-                            "The correct method format like \" public ReturnT<String> execute(String param) \" .");
-                }*/
-
                 executeMethod.setAccessible(true);
-
                 // init and destory 是否有 init, destroy 方法
                 Method initMethod = null;
                 Method destroyMethod = null;
@@ -149,9 +134,8 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                         throw new RuntimeException("xxl-job method-jobhandler destroyMethod invalid, for[" + bean.getClass() + "#" + executeMethod.getName() + "] .");
                     }
                 }
-
                 // registry jobhandler 注册 jobhandler, 存放于一个 jobhandlerName -> methodJobHandler 的map中
-                    registJobHandler(name, new MethodJobHandler(bean, executeMethod, initMethod, destroyMethod));
+                registJobHandler(name, new MethodJobHandler(bean, executeMethod, initMethod, destroyMethod));
             }
         }
 

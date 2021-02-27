@@ -70,7 +70,6 @@ public class XxlJobExecutor  {
         // init invoker, admin-client 初始化adminBizList, 方便后续调度中心注册自己
         initAdminBizList(adminAddresses, accessToken);
 
-
         // init JobLogFileCleanThread 初始化日志清洗线程
         JobLogFileCleanThread.getInstance().start(logRetentionDays);
 
