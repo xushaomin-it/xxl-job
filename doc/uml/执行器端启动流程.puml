@@ -2,10 +2,24 @@
 'https://plantuml.com/sequence-diagram
 
 autonumber
-
-XxlJobSpringExecutor -> XxlJobSpringExecutor: initJobHandlerMethodRepository 注册 jobhandler
-XxlJobExecutor --> XxlJobExecutor: Authentication Response
-
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+== 将任务注册到Spring环境中 ==
+XxlJobSpringExecutor -> XxlJobSpringExecutor: initJobHandlerMethodRepository
+rnote over XxlJobSpringExecutor
+注册 jobhandler
+endrnote
+XxlJobSpringExecutor -> XxlJobSpringExecutor: GlueFactory.refreshInstance(1)
+rnote over XxlJobSpringExecutor
+用于动态生成jobHandler (任务为GLUE模式下使用)
+endrnote
+== 初始化日志,注册,callback处理 ==
+XxlJobSpringExecutor -> XxlJobExecutor: start()
+XxlJobExecutor -> XxlJobExecutor: XxlJobFileAppender.initLogPath(logPath) 初始化执行日志路径
+XxlJobExecutor -> XxlJobExecutor: initAdminBizList 初始化调度中心信息列表
+XxlJobExecutor -> XxlJobExecutor: JobLogFileCleanThread.getInstance().start(logRetentionDays) 启动执行日志清理线程
+XxlJobExecutor -> XxlJobExecutor: TriggerCallbackThread.getInstance().start() 启动任务回调线程
+XxlJobExecutor -> XxlJobExecutor: initEmbedServer 开启内置Server
+== 开启内置server,自动注册调度中心 ==
+XxlJobExecutor -> EmbedServer:  embedServer.start
+EmbedServer -> EmbedServer: start netty server 启动 netty 服务
+EmbedServer -> EmbedServer: startRegistry 调度器自动注册调度中心
 @enduml
