@@ -2,9 +2,10 @@ package com.xxl.job.executor.service.jobhandler;
 
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
+import com.xxl.job.core.util.DateUtil;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Date;
 
 /**
  * @author xsm
@@ -20,13 +21,8 @@ public class MyJobHandler {
     @XxlJob("demoJobHandler")
     public void demoJobHandler() throws Exception {
         XxlJobHelper.log("XXL-JOB, Hello World.");
-
-        for (int i = 0; i < 5; i++) {
-            XxlJobHelper.log("beat at:" + i);
-            System.out.println("XXL-JOB, Hello World");
-            TimeUnit.SECONDS.sleep(2);
-        }
-        // default success
+        System.out.println("time: " + DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+        System.out.println("XXL-JOB, Hello World");
     }
 
     /**

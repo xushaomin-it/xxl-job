@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
+    // GLUE 模式 注入的bean
+
     public String getById(Integer id){
         return "xxl-job";
     }
