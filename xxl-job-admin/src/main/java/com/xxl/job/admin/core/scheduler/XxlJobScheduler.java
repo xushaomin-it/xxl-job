@@ -35,7 +35,7 @@ public class XxlJobScheduler  {
         JobFailMonitorHelper.getInstance().start();
 
         // admin lose-monitor run ( depend on JobTriggerPoolHelper )
-        // 初始化了callbackThreadPool线程池, 用于处理异常的任务并进行重试
+        // 初始化了callbackThreadPool线程池用于处理执行器的任务执行结果回调, 初始化monitorThread用于处理异常的任务并进行重试
         JobCompleteHelper.getInstance().start();
 
         // admin log report start
