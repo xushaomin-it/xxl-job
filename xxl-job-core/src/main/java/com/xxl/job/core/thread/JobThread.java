@@ -123,7 +123,7 @@ public class JobThread extends Thread{
 							triggerParam.getBroadcastIndex(),
 							triggerParam.getBroadcastTotal());
 
-					// init job context
+					// init job context 设置调度任务上下文(任务参数,任务id等信息)
 					XxlJobContext.setXxlJobContext(xxlJobContext);
 
 					// execute
@@ -241,6 +241,7 @@ public class JobThread extends Thread{
 
 		// destroy
 		try {
+		    // 最后执行handle的销毁动作,jobThread 才真正执行结束
 			handler.destroy();
 		} catch (Throwable e) {
 			logger.error(e.getMessage(), e);

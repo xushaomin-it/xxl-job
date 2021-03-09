@@ -130,7 +130,7 @@ public class JobScheduleHelper {
                             } else {
                                 // 2.3、trigger-pre-read：time-ring trigger && make next-trigger-time
 
-                                // 1、make ring second, 计算时间, 取余
+                                // 1、make ring second, 计算时间, 取余, 获取任务执行对应的秒数
                                 int ringSecond = (int)((jobInfo.getTriggerNextTime()/1000)%60);
 
                                 // 2、push time ring 放入到时间轮中
