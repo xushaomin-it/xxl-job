@@ -99,6 +99,7 @@ public class JobCompleteHelper {
 					}
 
                     try {
+                        // 每分钟执行一次
                         TimeUnit.SECONDS.sleep(60);
                     } catch (Exception e) {
                         if (!toStop) {
