@@ -153,6 +153,7 @@ public class JobCompleteHelper {
 
 	private ReturnT<String> callback(HandleCallbackParam handleCallbackParam) {
 		// valid log item
+        // 获取对应的执行日志
 		XxlJobLog log = XxlJobAdminConfig.getAdminConfig().getXxlJobLogDao().load(handleCallbackParam.getLogId());
 		if (log == null) {
 			return new ReturnT<String>(ReturnT.FAIL_CODE, "log item not found.");
