@@ -24,12 +24,15 @@ public class ExecutorRouteLFU extends ExecutorRouter {
     public String route(int jobId, List<String> addressList) {
 
         // cache clear 缓存时间 一天
+        // 如果当前系统时间大于过期时间
         if (System.currentTimeMillis() > CACHE_VALID_TIME) {
-            jobLfuMap.clear();
+            jobLfuMap.clear(); // 清空
+            // 重新设置过期时间，默认为一天
             CACHE_VALID_TIME = System.currentTimeMillis() + 1000*60*60*24;
         }
 
         // lfu item init
+        // 从MAP中获取执行信息
         HashMap<String, Integer> lfuItemMap = jobLfuMap.get(jobId);     // Key排序可以用TreeMap+构造入参Compare；Value排序暂时只能通过ArrayList；
         if (lfuItemMap == null) {
             lfuItemMap = new HashMap<String, Integer>();
@@ -38,10 +41,14 @@ public class ExecutorRouteLFU extends ExecutorRouter {
 
         // put new
         for (String address: addressList) {
+            // map中不包含，并且值大于一万的时候，需要重新初始化执行器地址对应的执行次数
+            // 初始化的规则是在机器地址列表size里面进行随机
+            // 当运行一段时间后，有新机器加入的时候，此时，新机器初始化的执行次数较小，所以一开始，新机器的压力会比较大，后期慢慢趋于平衡
             if (!lfuItemMap.containsKey(address) || lfuItemMap.get(address) >1000000 ) {
                 lfuItemMap.put(address, new Random().nextInt(addressList.size()));  // 初始化时主动Random一次，缓解首次压力
             }
         }
+        // 移除掉已经下线的执行器
         // remove old
         List<String> delKeys = new ArrayList<>();
         for (String existKey: lfuItemMap.keySet()) {
@@ -56,6 +63,7 @@ public class ExecutorRouteLFU extends ExecutorRouter {
         }
 
         // load least userd count address
+        // 将lfuItemMap中的key.value, 取出来，然后使用Comparator进行排序，value小的靠前。
         List<Map.Entry<String, Integer>> lfuItemList = new ArrayList<Map.Entry<String, Integer>>(lfuItemMap.entrySet());
         Collections.sort(lfuItemList, new Comparator<Map.Entry<String, Integer>>() {
             @Override
@@ -63,7 +71,7 @@ public class ExecutorRouteLFU extends ExecutorRouter {
                 return o1.getValue().compareTo(o2.getValue());
             }
         });
-
+        // 取第一个，也就是最小的一个，将address返回，同时对该address对应的值加1 。
         Map.Entry<String, Integer> addressItem = lfuItemList.get(0);
         String minAddress = addressItem.getKey();
         addressItem.setValue(addressItem.getValue() + 1);

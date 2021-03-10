@@ -27,6 +27,7 @@ public class ExecutorRouteLRU extends ExecutorRouter {
         // cache clear
         if (System.currentTimeMillis() > CACHE_VALID_TIME) {
             jobLRUMap.clear();
+            // 重新设置过期时间，默认为一天
             CACHE_VALID_TIME = System.currentTimeMillis() + 1000*60*60*24;
         }
 
@@ -43,6 +44,7 @@ public class ExecutorRouteLRU extends ExecutorRouter {
         }
 
         // put new
+        // 如果地址列表里面有地址不在map中，此处是可以再次放入，防止添加机器的问题
         for (String address: addressList) {
             if (!lruItem.containsKey(address)) {
                 lruItem.put(address, address);
@@ -62,6 +64,7 @@ public class ExecutorRouteLRU extends ExecutorRouter {
         }
 
         // load
+        // 取头部的一个元素，也就是最久操作过的数据
         String eldestKey = lruItem.entrySet().iterator().next().getKey();
         String eldestValue = lruItem.get(eldestKey);
         return eldestValue;
