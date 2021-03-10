@@ -1,0 +1,29 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+group 接受调度中心任务调度请求
+EmbedHttpServerHandler -> EmbedHttpServerHandler: process() 处理调度中心请求
+EmbedHttpServerHandler -> ExecutorBiz: executorBiz.run(triggerParam) 处理任务调度
+ExecutorBiz -> JobThread: jobThread.pushTriggerQueue(triggerParam)
+ExecutorBiz --> EmbedHttpServerHandler
+end
+group loop 执行调度任务
+activate JobThread
+JobThread -> JobThread: handler.execute() 执行任务
+activate JobThread
+JobThread -> TriggerCallbackThread: pushCallBack()
+deactivate JobThread
+activate TriggerCallbackThread
+TriggerCallbackThread -> TriggerCallbackThread: callBackQueue.add(callback)
+TriggerCallbackThread --> JobThread
+deactivate TriggerCallbackThread
+deactivate JobThread
+end
+group loop 任务执行结果回调上报调度中心
+TriggerCallbackThread -> TriggerCallbackThread: callback = callBackQueue.take()
+TriggerCallbackThread -> AdminBiz: adminBiz.callback(callbackParamList)
+AdminBiz -> AdminBiz: callback 上报任务执行结果到调度中心
+end
+deactivate TriggerCallbackThread
+@enduml

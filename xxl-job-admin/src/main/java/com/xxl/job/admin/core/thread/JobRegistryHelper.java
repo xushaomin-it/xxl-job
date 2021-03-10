@@ -32,6 +32,7 @@ public class JobRegistryHelper {
 	public void start(){
 
 		// for registry or remove
+		// 执行器注册,下线执行线程池
 		registryOrRemoveThreadPool = new ThreadPoolExecutor(
 				2,
 				10,

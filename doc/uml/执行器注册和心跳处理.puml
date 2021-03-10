@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+XxlJobExecutor -> EmbedServer: initEmbedServer()
+EmbedServer -> EmbedServer: start()
+EmbedServer -> EmbedServer: startRegistry(appname, address)
+EmbedServer -> ExecutorRegistryThread: start()
+activate ExecutorRegistryThread
+group 以30秒的间隔进行循环调用
+ExecutorRegistryThread -> XxlJobExecutor: getAdminBizList()
+XxlJobExecutor --> ExecutorRegistryThread: List<AdminBiz>
+ExecutorRegistryThread -> AdminBizClient: registry()
+activate ExecutorRegistryThread
+end
+
+@enduml

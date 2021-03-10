@@ -153,7 +153,7 @@ public class XxlJobExecutor  {
         }
 
         // start 创建netty服务端
-        embedServer = new EmbedServer();
+            embedServer = new EmbedServer();
         embedServer.start(address, port, appname, accessToken);
     }
 
